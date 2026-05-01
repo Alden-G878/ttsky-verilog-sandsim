@@ -197,26 +197,26 @@ module spi
 	sr_out_en_inp = 1'b0;
 	shift_count_inp = 5'b0;
 	if(nextState==write_load) begin
-	    sio0_out_inp = {8'b00111000, addr[20], addr[16], addr[12], addr[8], addr[4], addr[0], 'b0};
-            sio1_out_inp = {8'b0, addr[21], addr[17], addr[13], addr[9], addr[5], addr[1], 'b0};
-            sio2_out_inp = {8'b0, addr[22], addr[18], addr[14], addr[10], addr[6], addr[2], 'b0};
-            sio3_out_inp = {8'b0, addr[23], addr[19], addr[15], addr[11], addr[7], addr[3], 'b0};
-            sio_highz_inp = 'b0; 
+	    sio0_out_inp = {8'b00111000, addr[20], addr[16], addr[12], addr[8], addr[4], addr[0], 10'b0};
+            sio1_out_inp = {8'b0, addr[21], addr[17], addr[13], addr[9], addr[5], addr[1], 10'b0};
+            sio2_out_inp = {8'b0, addr[22], addr[18], addr[14], addr[10], addr[6], addr[2], 10'b0};
+            sio3_out_inp = {8'b0, addr[23], addr[19], addr[15], addr[11], addr[7], addr[3], 10'b0};
+            sio_highz_inp = 24'b0; 
 	    sr_out_en_inp = 1'b0;
 	end
 	if(nextState==write_wait) begin
-	    sio0_out_inp = {sio0_out_reg[22:0], 1'b0};
-	    sio1_out_inp = {sio1_out_reg[22:0], 1'b0};
-	    sio2_out_inp = {sio2_out_reg[22:0], 1'b0};
-	    sio3_out_inp = {sio3_out_reg[22:0], 1'b0};
+	    sio0_out_inp = {sio0_out_reg[22:0], 23'b0};
+	    sio1_out_inp = {sio1_out_reg[22:0], 23'b0};
+	    sio2_out_inp = {sio2_out_reg[22:0], 23'b0};
+	    sio3_out_inp = {sio3_out_reg[22:0], 23'b0};
 	    sr_out_en_inp = 1'b1;
 	    shift_count_inp = shift_count + 5'b1;
 	end
 	if(nextState==read_addr_load) begin
-	    sio0_out_inp = {8'b11101011, addr[20], addr[16], addr[12], addr[8], addr[4], addr[0], 'b0};
-            sio1_out_inp = {8'b0, addr[21], addr[17], addr[13], addr[9], addr[5], addr[1], 'b0};
-            sio2_out_inp = {8'b0, addr[22], addr[18], addr[14], addr[10], addr[6], addr[2], 'b0};
-            sio3_out_inp = {8'b0, addr[23], addr[19], addr[15], addr[11], addr[7], addr[3], 'b0};
+	    sio0_out_inp = {8'b11101011, addr[20], addr[16], addr[12], addr[8], addr[4], addr[0], 10'b0};
+            sio1_out_inp = {8'b0, addr[21], addr[17], addr[13], addr[9], addr[5], addr[1], 10'b0};
+            sio2_out_inp = {8'b0, addr[22], addr[18], addr[14], addr[10], addr[6], addr[2], 10'b0};
+            sio3_out_inp = {8'b0, addr[23], addr[19], addr[15], addr[11], addr[7], addr[3], 10'b0};
             sio_highz_inp = {14'b0, 11'b000_0000_1111};
 	    sr_out_en_inp = 1'b0;
 	end
@@ -238,12 +238,12 @@ module spi
 	    shift_count_inp = shift_count + 5'b1;
 	end
 	if(nextState==init_rst_en_load) begin
-	    sio0_out_inp = {8'h66, 'b0};
-	    sio1_out_inp = {'b0};
-	    sio2_out_inp = {'b0};
-	    sio3_out_inp = {'b0};
+	    sio0_out_inp = {8'h66, 16'b0};
+	    sio1_out_inp = {24'b0};
+	    sio2_out_inp = {24'b0};
+	    sio3_out_inp = {24'b0};
 	    sr_out_en_inp = 1'b0;
-	    sio_highz_inp = 'b0;
+	    sio_highz_inp = 24'b0;
 	end
 	if(nextState==init_rst_en_wait) begin
 	    sio0_out_inp = {spi_sio0_in, sio0_out_reg[23:1]};
@@ -254,12 +254,12 @@ module spi
 	    shift_count_inp = shift_count + 5'b1;
 	end
 	if(nextState==init_rst_load) begin
-	    sio0_out_inp = {8'h99, 'b0};
-	    sio1_out_inp = {'b0};
-	    sio2_out_inp = {'b0};
-	    sio3_out_inp = {'b0};
+	    sio0_out_inp = {8'h99, 16'b0};
+	    sio1_out_inp = {24'b0};
+	    sio2_out_inp = {24'b0};
+	    sio3_out_inp = {24'b0};
 	    sr_out_en_inp = 1'b0;
-	    sio_highz_inp = 'b0;
+	    sio_highz_inp = 24'b0;
 	end
 	if(nextState==init_rst_wait) begin
 	    sio0_out_inp = {spi_sio0_in, sio0_out_reg[23:1]};
@@ -270,12 +270,12 @@ module spi
 	    shift_count_inp = shift_count + 5'b1;
 	end
 	if(nextState==init_spi_qmen_load) begin
-	    sio0_out_inp = {8'h35, 'b0};
-	    sio1_out_inp = {'b0};
-	    sio2_out_inp = {'b0};
-	    sio3_out_inp = {'b0};
+	    sio0_out_inp = {8'h35, 16'b0};
+	    sio1_out_inp = {24'b0};
+	    sio2_out_inp = {24'b0};
+	    sio3_out_inp = {24'b0};
 	    sr_out_en_inp = 1'b0;
-	    sio_highz_inp = 'b0;
+	    sio_highz_inp = 24'b0;
 	end
 	if(nextState==init_spi_qmen_wait) begin
 	    sio0_out_inp = {spi_sio0_in, sio0_out_reg[23:1]};
@@ -401,14 +401,14 @@ module tt_um_sandsim_Alden_G878 (
   logic [$clog2(524)-1:0] vga_y_pos;
   logic [1:0] vga_r, vga_g, vga_b;
   logic vga_hsync, vga_vsync;
-  assign uo[0] = vga_r[1];
-  assign uo[1] = vga_g[1];
-  assign uo[2] = vga_b[1];
-  assign uo[3] = vga_vsync;
-  assign uo[4] = vga_r[0];
-  assign uo[5] = vga_g[0];
-  assign uo[6] = vga_b[0];
-  assign uo[7] = vga_hsync;
+  assign uo_out[0] = vga_r[1];
+  assign uo_out[1] = vga_g[1];
+  assign uo_out[2] = vga_b[1];
+  assign uo_out[3] = vga_vsync;
+  assign uo_out[4] = vga_r[0];
+  assign uo_out[5] = vga_g[0];
+  assign uo_out[6] = vga_b[0];
+  assign uo_out[7] = vga_hsync;
   vga_controller vga
     (.clk, .rst_b,
      .pix, .pix_valid,
