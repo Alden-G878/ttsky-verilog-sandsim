@@ -115,11 +115,7 @@ module spi
      output logic                     spi_clk, spi_ceb, spi_sio0_out, spi_sio1_out, spi_sio2_out, spi_sio3_out, spi_highz,
      input  logic                     spi_sio0_in, spi_sio1_in, spi_sio2_in, spi_sio3_in,
      output logic                     spi_read_en);
-    // temporary assignments
-    assign data_out = 8'b0;
-    assign read_done = 1'b0;
-    assign write_done = 1'b0;
-    assign init_done = 1'b0;
+    assign data_out = {sio3_out_inp[24], sio2_out_inp[24], sio1_out_inp[24], sio0_out_inp[24], sio3_out_inp[23], sio2_out_inp[23], sio1_out_inp[23], sio0_out_inp[23]};
     // address generation
     //logic [$clog2(COL)-1:0] col_int;
     //logic [$clog2(ROW)-1:0] row_int;
@@ -192,6 +188,7 @@ module spi
     end
     assign spi_clk = (sr_out_en==1'b1) ? (clk) : (1'b0);
     assign spi_ceb = ~sr_out_en;
+    assign data_out = 
     always_comb begin
 	sio0_out_inp = sio0_out_reg;
 	sio1_out_inp = sio1_out_reg;
@@ -206,10 +203,10 @@ module spi
 	shift_count_inp = 5'b0;
         spi_read_inp = 1'b0;
 	if(nextState==write_load) begin
-	    sio0_out_inp = {8'b00111000, addr[20], addr[16], addr[12], addr[8], addr[4], addr[0], 10'b0};
-            sio1_out_inp = {8'b0, addr[21], addr[17], addr[13], addr[9], addr[5], addr[1], 10'b0};
-            sio2_out_inp = {8'b0, addr[22], addr[18], addr[14], addr[10], addr[6], addr[2], 10'b0};
-            sio3_out_inp = {8'b0, addr[23], addr[19], addr[15], addr[11], addr[7], addr[3], 10'b0};
+	    sio0_out_inp = {8'b00111000, addr[20], addr[16], addr[12], addr[8], addr[4], addr[0], data_in[4], data_in[0], data_in[4], data_in[0], data_in[4], data_in[0], data_in[4], data_in[0]};
+            sio1_out_inp = {8'b00000000, addr[21], addr[17], addr[13], addr[9], addr[5], addr[1], data_in[5], data_in[1], data_in[5], data_in[1], data_in[5], data_in[1], data_in[5], data_in[1]};
+            sio2_out_inp = {8'b00000000, addr[22], addr[18], addr[14], addr[10], addr[6], addr[2], data_in[6], data_in[2], data_in[6], data_in[2], data_in[6], data_in[2], data_in[6], data_in[2]};
+            sio3_out_inp = {8'b00000000, addr[23], addr[19], addr[15], addr[11], addr[7], addr[3], data_in[7], data_in[3], data_in[7], data_in[3], data_in[7], data_in[3], data_in[7], data_in[3]};
             sio_highz_inp = 24'b0; 
 	    sr_out_en_inp = 1'b0;
 	end
@@ -299,6 +296,9 @@ module spi
     
     always_comb begin
 	nextState = wt;
+	read_done = 1'b0
+	write_done = 1'b0;
+	init_done = 1'b0;
 	case(currState)
 	    wt: // wait for read or write command
 		begin
@@ -318,7 +318,10 @@ module spi
 		end
 	    write_wait: // wait for write command to be shifted out
 		begin
-		    if(shift_count>=5'd24) nextState = wt;
+		    if(shift_count>=5'd24) begin
+			nextState = wt;
+			write_done = 1'b1;
+		    end
 		    else nextState = write_wait;
 		end
 	    read_addr_load: // load first read state, to shift out address
@@ -332,7 +335,10 @@ module spi
 		end
 	    read_data_wait: 
 		begin
-		    if(shift_count>=5'd24) nextState = wt;
+		    if(shift_count>=5'd24) begin
+			nextState = wt;
+			read_done = 1'b1;
+		    end
 		    else nextState = read_data_wait;
 		end
 	    init_rst_en_load: // init, load command to reset SPI
@@ -359,7 +365,10 @@ module spi
 		end
 	    init_spi_qmen_wait:
 		begin
-		    if(shift_count>=5'd8) nextState = wt;
+		    if(shift_count>=5'd8) begin
+			nextState = wt;
+			init_done = 1'b0;
+		    end
 		    else nextState = init_spi_qmen_wait;
 		end
 	endcase
