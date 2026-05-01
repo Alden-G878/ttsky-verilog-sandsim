@@ -504,7 +504,7 @@ module tt_um_sandsim_Alden_G878 (
   always_ff @(posedge clk) begin
     since_init <= (since_init >= 32'd10000) ? (32'd10000) : (since_init <= since_init + 32'd1);
     if(rst_b==1'b0) since_init <= 32'b0;
-    if(since_init == 1'b0) spi_init <= 1'b1);
+    if(since_init == 1'b0) spi_init <= 1'b1;
     else spi_init <= 1'b0;
   end
  
