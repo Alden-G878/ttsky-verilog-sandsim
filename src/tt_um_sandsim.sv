@@ -152,7 +152,7 @@ module spi
     assign spi_sio2_in = sio2_in_reg[32];
     assign spi_sio3_in = sio3_in_reg[32];*/
     logic sr_out_en, sio_read_en;
-    enum logic [1:0] {
+    enum logic [3:0] {
 	wt,
 	write_load,
 	write_wait, 
