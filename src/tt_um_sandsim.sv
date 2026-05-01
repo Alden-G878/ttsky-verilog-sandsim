@@ -4,7 +4,8 @@
  */
 
 `default_nettype none
-
+`define ROW 36
+`define COL 48
 // updates sand line
 module update
     #(parameter COL = 48)
@@ -366,6 +367,35 @@ module tt_um_example (
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
 );
+  // uio constants
+  assign uio_oe[0] = 1'b1; // flash chip enable output en
+  assign uio_out[0] = 1'b1; // flash chip enable
+  assign uio_oe[3] = 1'b1; // clock enable
+  assign uio_oe[6] = 1'b1; // used RAM chip enable
+  assign uio_oe[7] = 1'b1; // unused RAM chip enable output en
+  assign uio_out[7] = 1'b1; // unused RAM chip enable
+  
+  // uio pin assignments
+  // uio[0]: unused, const high
+  // uio[1]: SD0
+  // uio[2]: SD1
+  // uio[3]: SCK
+  // uio[4]: SD2
+  // uio[5]: SD3
+  // uio[6]: CS#
+  // uio[7]: unused, const high
+  
+  // uo pin assignmnets
+  // uo[0]: R1
+  // uo[1]: G1
+  // uo[2]: B1
+  // uo[3]: vsync
+  // uo[4]: R0
+  // uo[5]: G0
+  // uo[6]: B0
+  // uo[7]: hsync
+
+  
 
   /*// All output pins must be assigned. If not used, assign to 0.
   assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
