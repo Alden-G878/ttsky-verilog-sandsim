@@ -500,16 +500,16 @@ module tt_um_sandsim_Alden_G878 (
   logic [5:0] col_counter, row_counter, prev_row_counter;
   logic [5:0] time_since_shift, prev_vga_y_pos;
   assign pix = line_disp_wb[col_counter];
-  logic [31:0] since_init;
+  logic [9:0] since_init;
   always_ff @(posedge clk) begin
-    since_init <= (since_init >= 32'd10000) ? (32'd10000) : (since_init <= since_init + 32'd1);
-    if(rst_b==1'b0) since_init <= 32'b0;
+    since_init <= (since_init >= 10'd200) ? (10'd200) : (since_init <= since_init + 10'd1);
+    if(rst_b==1'b0) since_init <= 10'b0;
     if(since_init == 1'b0) spi_init <= 1'b1;
     else spi_init <= 1'b0;
   end
  
   always_ff @(posedge clk) begin
-    if(since_init >= 32'd1000) begin
+    if(since_init >= 10'd150) begin
     prev_row_counter <= row_counter;
     prev_vga_y_pos <= vga_y_pos;
     spi_write <= 1'b0;
