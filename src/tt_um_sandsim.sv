@@ -115,7 +115,6 @@ module spi
      output logic                     spi_clk, spi_ceb, spi_sio0_out, spi_sio1_out, spi_sio2_out, spi_sio3_out, spi_highz,
      input  logic                     spi_sio0_in, spi_sio1_in, spi_sio2_in, spi_sio3_in,
      output logic                     spi_read_en);
-    assign data_out = {sio3_out_inp[24], sio2_out_inp[24], sio1_out_inp[24], sio0_out_inp[24], sio3_out_inp[23], sio2_out_inp[23], sio1_out_inp[23], sio0_out_inp[23]};
     // address generation
     //logic [$clog2(COL)-1:0] col_int;
     //logic [$clog2(ROW)-1:0] row_int;
@@ -139,6 +138,7 @@ module spi
     logic [23:0] sio1_out_inp;
     logic [23:0] sio2_out_inp;
     logic [23:0] sio3_out_inp;
+    assign data_out = {sio3_out_inp[24], sio2_out_inp[24], sio1_out_inp[24], sio0_out_inp[24], sio3_out_inp[23], sio2_out_inp[23], sio1_out_inp[23], sio0_out_inp[23]};
     /*logic [23:0] sio0_in_inp;
     logic [23:0] sio1_in_inp;
     logic [23:0] sio2_in_inp;
@@ -488,8 +488,6 @@ module tt_um_sandsim_Alden_G878 (
     ui_in[6] | 
     ui_in[7]; 
   // temporary assignments
-  assign kern_in_src = line_src;
-  assign kern_in_dest = line_dest;
   update kernel
     (.clk, .rst_b, 
      .c_in_src(kern_in_src), .c_in_dest(kern_in_dest),
@@ -498,6 +496,8 @@ module tt_um_sandsim_Alden_G878 (
 
   logic [47:0] line_disp_wb, line_src, line_dest, line_in;
   logic [5:0] col_counter, row_counter, prev_row_counter;
+  assign kern_in_src = line_src;
+  assign kern_in_dest = line_dest;
   logic [5:0] time_since_shift, prev_vga_y_pos;
   assign pix = line_disp_wb[col_counter];
   logic [9:0] since_init;
