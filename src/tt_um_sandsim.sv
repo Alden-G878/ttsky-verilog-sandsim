@@ -193,7 +193,7 @@ module spi
 	sio1_in_inp = sio1_in_reg;
 	sio2_in_inp = sio2_in_reg;
 	sio3_in_inp = sio3_in_reg;*/
-	sio_highz_inp = 'b0;
+	sio_highz_inp = 24'b0;
 	sr_out_en_inp = 1'b0;
 	shift_count_inp = 5'b0;
 	if(nextState==write_load) begin
@@ -367,6 +367,8 @@ module tt_um_sandsim_Alden_G878 (
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
 );
+  logic rst_b;
+  assign rst_b = rst_n;
   // uio constants
   assign uio_oe[0] = 1'b1; // flash chip enable output en
   assign uio_out[0] = 1'b1; // flash chip enable
