@@ -15,10 +15,9 @@ module update
      input logic            make_sand);
     logic [COL-1:0] c_in_src_int0, c_in_src_int1;
     logic [COL-1:0] c_in_dest_int0, c_in_dest_int1;
-    generate
-	int i, j, k;
         always_ff @(posedge clk) begin
-	    for(i=0;i<COL;i++) begin
+	    int i, j, k;
+            for(i=0;i<COL;i++) begin
 		if(i==COL/2) begin
 		    c_in_src_int0[i] <= (c_in_dest[i]==1'b0) ? (1'b0) : (c_in_src[i]);
 		    c_in_dest_int0[i] <= (c_in_dest[i]==1'b0) ? (make_sand) : (c_in_dest[i]);
@@ -61,7 +60,6 @@ module update
 		endcase
 	    end
         end
-    endgenerate
 endmodule: update
 
 // VGA controller
