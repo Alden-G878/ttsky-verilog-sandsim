@@ -168,7 +168,7 @@ module spi
     logic [7:0] sio_read_inout_counter;
     logic [4:0] shift_count, shift_count_inp;
     logic [1:0] read_buf[3:0];
-    logic sr_out_en_inp;
+    logic sr_out_en_inp, spi_read_inp;
     always_ff @(posedge clk) begin
 	currState <= nextState;
 	sio0_out_reg <= sio0_out_inp;
@@ -181,6 +181,8 @@ module spi
 	sio3_in_reg <= sio0_in_inp;*/
 	sr_out_en <= sr_out_en_inp;
 	shift_count <= shift_count_inp;
+        sio_highz_reg <= sio_highz_inp;
+	spi_read_en <= spi_read_inp;
     end
     assign spi_clk = (sr_out_en==1'b1) ? (clk) : (1'b0);
     assign spi_ceb = ~sr_out_en;
@@ -236,6 +238,7 @@ module spi
 	    sio3_out_inp = {spi_sio3_in, sio3_out_reg[23:1]};
 	    sr_out_en_inp = 1'b1;
 	    shift_count_inp = shift_count + 5'b1;
+	    spi_read_inp  = 1'b1;
 	end
 	if(nextState==init_rst_en_load) begin
 	    sio0_out_inp = {8'h66, 16'b0};
@@ -418,6 +421,8 @@ module tt_um_sandsim_Alden_G878 (
      .vga_r, .vga_g, .vga_b,
      .vga_hsync, .vga_vsync);
 
+
+  // SPI module
   logic spi_read, spi_write, spi_init, spi_read_done, spi_write_done, spi_init_done;
   logic [$clog2(`COL/8)-1:0] spi_col;
   logic [$clog2(`ROW)-1:0]   spi_row;
@@ -450,6 +455,25 @@ module tt_um_sandsim_Alden_G878 (
      .spi_sio0_in(spi_sd0_in), .spi_sio1_in(spi_sd1_in), .spi_sio2_in(spi_sd2_in), .spi_sio3_in(spi_sd3_in),
      .spi_highz, .spi_read_en,
      .data_in(spi_din), .data_out(spi_dout));
+
+  // update kernel
+  logic [`COL-1:0] kern_in_src, kern_in_dest;
+  logic [`COL-1:0] kern_out_src, kern_out_dest;
+  logic make_sand;
+  assign make_sand = 
+    ui_in[0] | 
+    ui_in[1] | 
+    ui_in[2] | 
+    ui_in[3] | 
+    ui_in[4] | 
+    ui_in[5] | 
+    ui_in[6] | 
+    ui_in[7]; 
+  update kernel
+    (.clk, .rst_b, 
+     .c_in_src(kern_in_src), .c_in_dest(kern_in_dest),
+     .c_out_src(kern_out_src), .c_out_dest(kern_out_dest),
+     .make_sand);
   /*// All output pins must be assigned. If not used, assign to 0.
   assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
   assign uio_out = 0;
