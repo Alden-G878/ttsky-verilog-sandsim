@@ -152,7 +152,7 @@ module spi
     assign spi_sio1_out = sio1_out_reg[23];
     assign spi_sio2_out = sio2_out_reg[23];
     assign spi_sio3_out = sio3_out_reg[23];
-    assign spi_highz = sio_highz_red[23];
+    assign spi_highz = sio_highz_reg[23];
     /*assign spi_sio0_in = sio0_in_reg[32];
     assign spi_sio1_in = sio1_in_reg[32];
     assign spi_sio2_in = sio2_in_reg[32];
