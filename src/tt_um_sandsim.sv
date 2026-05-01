@@ -15,50 +15,53 @@ module update
      input logic            make_sand);
     logic [COL-1:0] c_in_src_int0, c_in_src_int1;
     logic [COL-1:0] c_in_dest_int0, c_in_dest_int1;
-    always_ff @(posedge clk) begin
-	generate
-	    for(genvar i=0;i<COL;i++) begin
+    generate
+	int i, j, k;
+        always_ff @(posedge clk) begin
+	    for(i=0;i<COL;i++) begin
 		if(i==COL/2) begin
 		    c_in_src_int0[i] <= (c_in_dest[i]==1'b0) ? (1'b0) : (c_in_src[i]);
 		    c_in_dest_int0[i] <= (c_in_dest[i]==1'b0) ? (make_sand) : (c_in_dest[i]);
 		end
-		c_in_src_int0[i] <= (c_in_dest[i]==1'b0) ? (1'b0) : (c_in_src[i]);
-		c_in_dest_int0[i] <= (c_in_dest[i]==1'b0) ? (c_in_src[i]) : (c_in_dest[i]);
+		else begin
+		    c_in_src_int0[i] <= (c_in_dest[i]==1'b0) ? (1'b0) : (c_in_src[i]);
+		    c_in_dest_int0[i] <= (c_in_dest[i]==1'b0) ? (c_in_src[i]) : (c_in_dest[i]);
+		end
 	    end
-	    for(genvar j=0;j<COL;j++) begin
+	    for(j=0;j<COL;j++) begin
 		case(j)
 		    0: begin
-			c_in_src_int1[i] <= (c_in_dest_int0[i+1]==1'b0) ? (1'b0) : (c_in_src_int0[i]);
-			c_in_dest_int1[i] <= c_in_dest_int0[i];
+			c_in_src_int1[j] <= (c_in_dest_int0[j+1]==1'b0) ? (1'b0) : (c_in_src_int0[j]);
+			c_in_dest_int1[j] <= c_in_dest_int0[j];
 		    end
 		    COL-1: begin
-			c_in_src_int1[i] <= c_in_src_int0[i];
-			c_in_dest_int1[i] <= (c_in_dest_int0[i]==1'b0) ? (c_in_src_int0[i-1]) : (c_in_dest_int0[i]);
+			c_in_src_int1[j] <= c_in_src_int0[j];
+			c_in_dest_int1[j] <= (c_in_dest_int0[j]==1'b0) ? (c_in_src_int0[j-1]) : (c_in_dest_int0[j]);
 		    end
 		    default: begin
-			c_in_src_int1[i] <= (c_in_dest_int0[i+1]==1'b0) ? (1'b0) : (c_in_src_int0[i]);
-			c_in_dest_int1[i] <= (c_in_dest_int0[i]==1'b0) ? (c_in_src_int0[i-1]) : (c_in_dest_int0[i]);
+			c_in_src_int1[j] <= (c_in_dest_int0[j+1]==1'b0) ? (1'b0) : (c_in_src_int0[j]);
+			c_in_dest_int1[j] <= (c_in_dest_int0[j]==1'b0) ? (c_in_src_int0[j-1]) : (c_in_dest_int0[j]);
 		    end
 		endcase
 	    end
-	    for(genvar k=0;k<COL;k++) begin
+	    for(k=0;k<COL;k++) begin
 		case(k)
 		    0: begin
-			c_out_src[i] <= c_in_dest_int1[i];
-			c_out_dest[i] <= (c_in_dest_int1[i]==1'b0) ? (c_in_src_int1[i+1]) : (c_in_dest_int1[i]);
+			c_out_src[k] <= c_in_dest_int1[k];
+			c_out_dest[k] <= (c_in_dest_int1[k]==1'b0) ? (c_in_src_int1[k+1]) : (c_in_dest_int1[k]);
 		    end
 		    COL-1: begin
-			c_out_src[i] <= (c_in_dest_int1[i-1]==1'b0) ? (1'b0) : (c_in_src_int1[i]);
-			c_out_dest[i] <= c_in_dest_int1[i];
+			c_out_src[k] <= (c_in_dest_int1[k-1]==1'b0) ? (1'b0) : (c_in_src_int1[k]);
+			c_out_dest[k] <= c_in_dest_int1[k];
 		    end
 		    default: begin
-			c_out_src[i] <= (c_in_dest_int1[i-1]==1'b0) ? (1'b0) : (c_in_src_int1[i]);
-			c_out_dest[i] <= (c_in_dest_int1[i]==1'b0) ? (c_in_src_int1[i+1]) : (c_in_dest_int1[i]);
+			c_out_src[k] <= (c_in_dest_int1[k-1]==1'b0) ? (1'b0) : (c_in_src_int1[k]);
+			c_out_dest[k] <= (c_in_dest_int1[k]==1'b0) ? (c_in_src_int1[k+1]) : (c_in_dest_int1[k]);
 		    end
 		endcase
 	    end
-	endgenerate
-    end
+        end
+    endgenerate
 endmodule: update
 
 // VGA controller
@@ -74,11 +77,11 @@ module vga_controller
 	    y_pos <= 'b0;
 	end
 	else begin
-	    if(x_pos > 10'd800 && y_pos > 9'd524) begin
+	    if(x_pos > 10'd800 && y_pos > 10'd524) begin
 		x_pos <= 'b0;
 		y_pos <= 'b0;
 	    end
-	    else if(y_pos > 9'd524) begin
+	    else if(y_pos > 10'd524) begin
 		x_pos <= 'b0;
 		y_pos <= 'b0;
 	    end
@@ -133,10 +136,10 @@ module spi
     logic [23:0] sio1_out_inp;
     logic [23:0] sio2_out_inp;
     logic [23:0] sio3_out_inp;
-    logic [23:0] sio0_in_inp;
+    /*logic [23:0] sio0_in_inp;
     logic [23:0] sio1_in_inp;
     logic [23:0] sio2_in_inp;
-    logic [23:0] sio3_in_inp;
+    logic [23:0] sio3_in_inp;*/
     logic [23:0] sio_highz_inp;
     assign spi_sio0_out = sio0_out_reg[23];
     assign spi_sio1_out = sio1_out_reg[23];
@@ -148,7 +151,7 @@ module spi
     assign spi_sio3_in = sio3_in_reg[32];*/
     logic [4:0] shift_count;
     logic [4:0] shift_max;
-    logic sio_out_en, sio_read_en;
+    logic sr_out_en, sio_read_en;
     enum logic [1:0] {
 	wt,
 	write_load,
@@ -159,7 +162,7 @@ module spi
 	init_rst_en_load,
 	init_rst_en_wait,
 	init_rst_load,
-	init_rts_wait,
+	init_rst_wait,
 	init_spi_qmen_load,
 	init_spi_qmen_wait} currState, nextState;
     logic [7:0] sio_read_inout_counter;
@@ -182,14 +185,14 @@ module spi
     assign spi_clk = (sr_out_en==1'b1) ? (clk) : (1'b0);
     assign spi_ceb = ~sr_out_en;
     always_comb begin
-	sio0_out_inp = 'b0;
-	sio1_out_inp = 'b0;
-	sio2_out_inp = 'b0;
-	sio3_out_inp = 'b0;
-	sio0_in_inp = 'b0;
-	sio1_in_inp = 'b0;
-	sio2_in_inp = 'b0;
-	sio3_in_inp = 'b0;
+	sio0_out_inp = sio0_out_reg;
+	sio1_out_inp = sio1_out_reg;
+	sio2_out_inp = sio2_out_reg;
+	sio3_out_inp = sio3_out_reg;
+	/*sio0_in_inp = sio0_in_reg;
+	sio1_in_inp = sio1_in_reg;
+	sio2_in_inp = sio2_in_reg;
+	sio3_in_inp = sio3_in_reg;*/
 	sio_highz_inp = 'b0;
 	sr_out_en_inp = 1'b0;
 	shift_count_inp = 5'b0;
@@ -226,7 +229,7 @@ module spi
 	    sr_out_en_inp = 1'b1;
 	    shift_count_inp = shift_count + 5'b1;
 	end
-	if(nextSate==read_data_wait) begin
+	if(nextState==read_data_wait) begin
 	    sio0_out_inp = {spi_sio0_in, sio0_out_reg[23:1]};
 	    sio1_out_inp = {spi_sio1_in, sio1_out_reg[23:1]};
 	    sio2_out_inp = {spi_sio2_in, sio2_out_reg[23:1]};
@@ -239,7 +242,7 @@ module spi
 	    sio1_out_inp = {'b0};
 	    sio2_out_inp = {'b0};
 	    sio3_out_inp = {'b0};
-	    so_out_en_inp = 1'b0;
+	    sr_out_en_inp = 1'b0;
 	    sio_highz_inp = 'b0;
 	end
 	if(nextState==init_rst_en_wait) begin
@@ -255,7 +258,7 @@ module spi
 	    sio1_out_inp = {'b0};
 	    sio2_out_inp = {'b0};
 	    sio3_out_inp = {'b0};
-	    so_out_en_inp = 1'b0;
+	    sr_out_en_inp = 1'b0;
 	    sio_highz_inp = 'b0;
 	end
 	if(nextState==init_rst_wait) begin
@@ -271,7 +274,7 @@ module spi
 	    sio1_out_inp = {'b0};
 	    sio2_out_inp = {'b0};
 	    sio3_out_inp = {'b0};
-	    so_out_en_inp = 1'b0;
+	    sr_out_en_inp = 1'b0;
 	    sio_highz_inp = 'b0;
 	end
 	if(nextState==init_spi_qmen_wait) begin
@@ -285,10 +288,6 @@ module spi
     end
     
     always_comb begin
-	sio_out_init_load = 1'b0;
-	sio_out_read_load = 1'b0;
-	sio_out_read_store = 1'b0;
-	write_en = 1'b0;
 	nextState = wt;
 	case(currState)
 	    wt: // wait for read or write command
@@ -318,7 +317,7 @@ module spi
 		end
 	    read_addr_wait: // shift out address
 		begin
-		    if(shift_count>=5'd20) nextState = read_data_load;
+		    if(shift_count>=5'd20) nextState = read_data_wait;
 		    else nextState = read_addr_wait;
 		end
 	    read_data_wait: 
