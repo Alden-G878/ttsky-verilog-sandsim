@@ -597,6 +597,8 @@ module tt_um_sandsim_Alden_G878 (
     end
   end
   always_comb begin
+    col_counter = 6'd0;
+    row_counter = 6'd0;
     if      (  0 <= vga_x_pos && vga_x_pos <=   9) col_counter = 6'd0;
     else if ( 10 <= vga_x_pos && vga_x_pos <=  19) col_counter = 6'd1;
     else if ( 20 <= vga_x_pos && vga_x_pos <=  29) col_counter = 6'd2;
