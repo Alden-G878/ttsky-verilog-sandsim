@@ -114,7 +114,7 @@ module spi
      output logic [7:0]               data_out,
      output logic                     spi_clk, spi_ceb, spi_sio0_out, spi_sio1_out, spi_sio2_out, spi_sio3_out, spi_highz,
      input  logic                     spi_sio0_in, spi_sio1_in, spi_sio2_in, spi_sio3_in,
-     input  logic                     spi_read_en);
+     output logic                     spi_read_en);
     // address generation
     //logic [$clog2(COL)-1:0] col_int;
     //logic [$clog2(ROW)-1:0] row_int;
