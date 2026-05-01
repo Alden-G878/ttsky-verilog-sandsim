@@ -70,7 +70,8 @@ module vga_controller
      input  logic pix, pix_valid,
      output logic [$clog2(800)-1:0] x_pos,
      output logic [$clog2(524)-1:0] y_pos,
-     output logic                   vga_r, vga_g, vga_b, vga_hsync, vga_vsync);
+     output logic [1:0]             vga_r, vga_g, vga_b,
+     output logic                   vga_hsync, vga_vsync);
     always_ff @(posedge clk) begin
 	if(rst_b==1'b0) begin
 	    x_pos <= 'b0;
@@ -112,7 +113,8 @@ module spi
      input  logic [7:0]               data_in,
      output logic [7:0]               data_out,
      output logic                     spi_clk, spi_ceb, spi_sio0_out, spi_sio1_out, spi_sio2_out, spi_sio3_out, spi_highz,
-     input  logic                     spi_sio0_in, spi_sio1_in, spi_sio2_in, spi_sio3_in);
+     input  logic                     spi_sio0_in, spi_sio1_in, spi_sio2_in, spi_sio3_in,
+     input  logic                     spi_read);
     // address generation
     //logic [$clog2(COL)-1:0] col_int;
     //logic [$clog2(ROW)-1:0] row_int;
@@ -351,6 +353,7 @@ module spi
 		    else nextState = init_spi_qmen_wait;
 		end
 	endcase
+	if(rst_b==1'b0) nextState = init_rst_en_load;
     end
     endmodule: spi
 
@@ -392,8 +395,58 @@ module tt_um_sandsim_Alden_G878 (
   // uo[6]: B0
   // uo[7]: hsync
 
-  
+  // vga controller
+  logic pix, pix_valid;
+  logic [$clog2(800)-1:0] vga_x_pos;
+  logic [$clog2(524)-1:0] vga_y_pos;
+  logic [1:0] vga_r, vga_g, vga_b;
+  logic vga_hsync, vga_vsync;
+  assign uo[0] = vga_r[1];
+  assign uo[1] = vga_g[1];
+  assign uo[2] = vga_b[1];
+  assign uo[3] = vga_vsync;
+  assign uo[4] = vga_r[0];
+  assign uo[5] = vga_g[0];
+  assign uo[6] = vga_b[0];
+  assign uo[7] = vga_hsync;
+  vga_controller vga
+    (.clk, .rst_b,
+     .pix, .pix_valid,
+     .x_pos(vga_x_pos), .y_pos(vga_y_pos),
+     .vga_r, .vga_g, .vga_b,
+     .vga_hsync, .vga_vsync);
 
+  logic spi_read, spi_write, spi_init, spi_read_done, spi_write_done, spi_init_done;
+  logic [$clog2(COL/8)-1:0] spi_col;
+  logic [$clog2(ROW)-1:0]   spi_row;
+  logic [7:0] spi_din, spi_dout;
+  logic spi_sck, spi_csb;
+  logic spi_sd0_out, spi_sd1_out, spi_sd2_out, spi_sd3_out;
+  logic spi_sd0_in, spi_sd1_in, spi_sd2_in, spi_sd3_in;
+  assign uio_out[1] = spi_sd0_out;
+  assign uio_out[2] = spi_sd1_out;
+  assign uio_in[1] = spi_sd0_in;
+  assign uio_in[2] = spi_sd1_in;
+  assign uio_out[3] = spi_sck;
+  assign uio_out[4] = spi_sd2_out;
+  assign uio_out[5] = spi_sd3_out;
+  assign uio_in[4] = spi_sd2_in;
+  assign uio_in[5] = spi_sd3_in;
+  assign uio_out[6] = spi_csb;
+  logic spi_highz, spi_read;
+  assign uio_oe[1] = ~(spi_highz | spi_csb);
+  assign uio_oe[2] = ~(spi_highz | spi_csb);
+  assign uio_oe[4] = ~(spi_highz | spi_csb);
+  assign uio_oe[5] = ~(spi_highz | spi_csb);
+  spi spi_cont
+    (.clk, .rst_b,
+     .read(spi_read), .write(spi_write), .init(spi_init),
+     .read_done(spi_read_done), .write_done(spi_write_done), .init_done(spi_init_done),
+     .col(spi_col), .row(spi_row),
+     .spi_clk(spi_sck), .spi_ceb(spi_csb),
+     .spi_sio0_out(spi_sd0_out), .spi_sio1_out(spi_sd1_out), .spi_sio2_out(spi_sd2_out), .spi_sio3_out(spi_sd3_out),
+     .spi_sio0_in(spi_sd0_in), .spi_sio1_in(spi_sd1_in), .spi_sio2_in(spi_sd2_in), .spi_sio3_in(spi_sd3_in),
+     .spi_highz, .spi_read);
   /*// All output pins must be assigned. If not used, assign to 0.
   assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
   assign uio_out = 0;
