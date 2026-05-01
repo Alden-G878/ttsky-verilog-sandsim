@@ -115,6 +115,11 @@ module spi
      output logic                     spi_clk, spi_ceb, spi_sio0_out, spi_sio1_out, spi_sio2_out, spi_sio3_out, spi_highz,
      input  logic                     spi_sio0_in, spi_sio1_in, spi_sio2_in, spi_sio3_in,
      output logic                     spi_read_en);
+    // temporary assignments
+    assign data_out = 8'b0;
+    assign read_done = 1'b0;
+    assign write_done = 1'b0;
+    assign init_done = 1'b0;
     // address generation
     //logic [$clog2(COL)-1:0] col_int;
     //logic [$clog2(ROW)-1:0] row_int;
@@ -415,6 +420,10 @@ module tt_um_sandsim_Alden_G878 (
   assign uo_out[5] = vga_g[0];
   assign uo_out[6] = vga_b[0];
   assign uo_out[7] = vga_hsync;
+  // temporary assignments
+  assign pix = 1'b0;
+  assign pix_valid = 1'b0;
+  
   vga_controller vga
     (.clk, .rst_b,
      .pix, .pix_valid,
@@ -446,6 +455,14 @@ module tt_um_sandsim_Alden_G878 (
   assign uio_oe[2] = ~(spi_highz | spi_read_en);
   assign uio_oe[4] = ~(spi_highz | spi_read_en);
   assign uio_oe[5] = ~(spi_highz | spi_read_en);
+  // temporary assignments
+  assign spi_read = 1'b0;
+  assign spi_write = 1'b0;
+  assign spi_init = 1'b0;
+  assign spi_col = 3'b0;
+  assign spi_row = 6'b0;
+  assign spi_din = 8'b0;
+  
   spi spi_cont
     (.clk, .rst_b,
      .read(spi_read), .write(spi_write), .init(spi_init),
@@ -470,6 +487,9 @@ module tt_um_sandsim_Alden_G878 (
     ui_in[5] | 
     ui_in[6] | 
     ui_in[7]; 
+  // temporary assignments
+  assign kern_in_src = 48'b0;
+  assign kern_in_dest = 48'b0;
   update kernel
     (.clk, .rst_b, 
      .c_in_src(kern_in_src), .c_in_dest(kern_in_dest),
