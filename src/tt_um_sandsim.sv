@@ -114,7 +114,7 @@ module spi
      output logic [7:0]               data_out,
      output logic                     spi_clk, spi_ceb, spi_sio0_out, spi_sio1_out, spi_sio2_out, spi_sio3_out, spi_highz,
      input  logic                     spi_sio0_in, spi_sio1_in, spi_sio2_in, spi_sio3_in,
-     input  logic                     spi_read);
+     input  logic                     spi_read_en);
     // address generation
     //logic [$clog2(COL)-1:0] col_int;
     //logic [$clog2(ROW)-1:0] row_int;
@@ -433,11 +433,11 @@ module tt_um_sandsim_Alden_G878 (
   assign uio_in[4] = spi_sd2_in;
   assign uio_in[5] = spi_sd3_in;
   assign uio_out[6] = spi_csb;
-  logic spi_highz, spi_read;
-  assign uio_oe[1] = ~(spi_highz | spi_csb);
-  assign uio_oe[2] = ~(spi_highz | spi_csb);
-  assign uio_oe[4] = ~(spi_highz | spi_csb);
-  assign uio_oe[5] = ~(spi_highz | spi_csb);
+  logic spi_highz, spi_read_en;
+  assign uio_oe[1] = ~(spi_highz | spi_read_en);
+  assign uio_oe[2] = ~(spi_highz | spi_read_en);
+  assign uio_oe[4] = ~(spi_highz | spi_read_en);
+  assign uio_oe[5] = ~(spi_highz | spi_read_en);
   spi spi_cont
     (.clk, .rst_b,
      .read(spi_read), .write(spi_write), .init(spi_init),
@@ -446,7 +446,7 @@ module tt_um_sandsim_Alden_G878 (
      .spi_clk(spi_sck), .spi_ceb(spi_csb),
      .spi_sio0_out(spi_sd0_out), .spi_sio1_out(spi_sd1_out), .spi_sio2_out(spi_sd2_out), .spi_sio3_out(spi_sd3_out),
      .spi_sio0_in(spi_sd0_in), .spi_sio1_in(spi_sd1_in), .spi_sio2_in(spi_sd2_in), .spi_sio3_in(spi_sd3_in),
-     .spi_highz, .spi_read);
+     .spi_highz, .spi_read_en);
   /*// All output pins must be assigned. If not used, assign to 0.
   assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
   assign uio_out = 0;
