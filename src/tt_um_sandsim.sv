@@ -429,9 +429,7 @@ module tt_um_sandsim_Alden_G878 (
   assign uo_out[5] = vga_g[0];
   assign uo_out[6] = vga_b[0];
   assign uo_out[7] = vga_hsync;
-  // temporary assignments
-  assign pix = 1'b0;
-  assign pix_valid = 1'b0;
+  assign pix_valid = 1'b1;
   
   vga_controller vga
     (.clk, .rst_b,
@@ -497,13 +495,192 @@ module tt_um_sandsim_Alden_G878 (
     ui_in[6] | 
     ui_in[7]; 
   // temporary assignments
-  assign kern_in_src = 48'b0;
-  assign kern_in_dest = 48'b0;
+  assign kern_in_src = line_src;
+  assign kern_in_dest = line_dest;
   update kernel
     (.clk, .rst_b, 
      .c_in_src(kern_in_src), .c_in_dest(kern_in_dest),
      .c_out_src(kern_out_src), .c_out_dest(kern_out_dest),
      .make_sand);
+
+  logic [47:0] line_disp_wb, line_src, line_dest, line_in;
+  logic [5:0] col_counter, row_counter, prev_row_counter;
+  logic [5:0] time_since_shift, prev_vga_y_pos;
+  assign pix = line_disp_wb[col_counter];
+  always_ff @(posedge clk) begin
+    prev_row_counter <= row_counter;
+    prev_vga_y_pos <= vga_y_pos;
+    spi_write <= 1'b0;
+    spi_read <= 1'b0;
+    if(prev_vga_y_pos!=vga_y_pos) begin
+      time_since_shift <= time_since_shift + 6'b1;
+      if(time_since_shift<=6'd1 && time_since_shift <= 6'd6) begin
+	spi_write <= 1'b1;
+      end
+    end
+    if(vga_x_pos==405) spi_read <= 1'b1;
+    if(prev_row_counter != row_counter) begin
+      time_since_shift <= 7'b0;
+      line_disp_wb <= line_src;
+      line_src <= line_dest;
+      line_dest <= line_in;
+    end
+    if(time_since_shift==6'd1) begin
+      spi_din <= line_disp_wb[47:40];
+      spi_col <= (col_counter >> 3'd3);
+      spi_row <= row_counter;
+      if(vga_x_pos >=10'd400 && vga_y_pos <= 10'd410) begin
+	spi_col <= ((col_counter + 3'd3) >> (3'd3));
+        spi_row <= row_counter;
+      end
+      if(vga_x_pos==10'd429) line_in[47:40] <= spi_dout;
+    end
+    if(time_since_shift==6'd2) begin
+      spi_din <= line_disp_wb[39:32];
+      spi_col <= (col_counter >> 3'd3);
+      spi_row <= row_counter;
+      if(vga_x_pos >=10'd400 && vga_y_pos <= 10'd410) begin
+	spi_col <= ((col_counter + 3'd3) >> (3'd3));
+        spi_row <= row_counter;
+      end
+      if(vga_x_pos==10'd429) line_in[39:32] <= spi_dout;
+    end
+    if(time_since_shift==6'd3) begin
+      spi_din <= line_disp_wb[31:24];
+      spi_col <= (col_counter >> 3'd3);
+      spi_row <= row_counter;
+      line_src <= kern_out_src;
+      line_dest <= kern_out_dest;
+      if(vga_x_pos >=10'd400 && vga_y_pos <= 10'd410) begin
+	spi_col <= ((col_counter + 3'd3) >> (3'd3));
+        spi_row <= row_counter;
+      end
+      if(vga_x_pos==10'd429) line_in[31:24] <= spi_dout;
+    end
+    if(time_since_shift==6'd4) begin
+      spi_din <= line_disp_wb[23:16];
+      spi_col <= (col_counter >> 3'd3);
+      spi_row <= row_counter;
+      if(vga_x_pos >=10'd400 && vga_y_pos <= 10'd410) begin
+	spi_col <= ((col_counter + 3'd3) >> (3'd3));
+        spi_row <= row_counter;
+      end
+      if(vga_x_pos==10'd429) line_in[23:16] <= spi_dout;
+    end
+    if(time_since_shift==6'd5) begin
+      spi_din <= line_disp_wb[15:8];
+      spi_col <= (col_counter >> 3'd3);
+      spi_row <= row_counter;
+      if(vga_x_pos >=10'd400 && vga_y_pos <= 10'd410) begin
+	spi_col <= ((col_counter + 3'd3) >> (3'd3));
+        spi_row <= row_counter;
+      end
+      if(vga_x_pos==10'd429) line_in[15:8] <= spi_dout;
+    end
+    if(time_since_shift==6'd6) begin
+      spi_din <= line_disp_wb[7:0];
+      spi_col <= (col_counter >> 3'd3);
+      spi_row <= row_counter;
+      if(vga_x_pos >=10'd400 && vga_y_pos <= 10'd410) begin
+	spi_col <= ((col_counter + 3'd3) >> (3'd3));
+        spi_row <= row_counter;
+      end
+      if(vga_x_pos==10'd429) line_in[7:0] <= spi_dout;
+    end
+    if(time_since_shift==6'd2) begin
+      spi_din <= line_disp_wb[39:32];
+      spi_col <= (col_counter >> 3'd3);
+      spi_row <= row_counter;
+    end
+  end
+  always_comb begin
+    if      (  0 <= vga_x_pos && vga_x_pos <=   9) col_counter = 6'd0;
+    else if ( 10 <= vga_x_pos && vga_x_pos <=  19) col_counter = 6'd1;
+    else if ( 20 <= vga_x_pos && vga_x_pos <=  29) col_counter = 6'd2;
+    else if ( 30 <= vga_x_pos && vga_x_pos <=  39) col_counter = 6'd3;
+    else if ( 40 <= vga_x_pos && vga_x_pos <=  49) col_counter = 6'd4;
+    else if ( 50 <= vga_x_pos && vga_x_pos <=  59) col_counter = 6'd5;
+    else if ( 60 <= vga_x_pos && vga_x_pos <=  69) col_counter = 6'd6;
+    else if ( 70 <= vga_x_pos && vga_x_pos <=  79) col_counter = 6'd7;
+    else if ( 80 <= vga_x_pos && vga_x_pos <=  89) col_counter = 6'd8;
+    else if ( 90 <= vga_x_pos && vga_x_pos <=  99) col_counter = 6'd9;
+    else if (100 <= vga_x_pos && vga_x_pos <= 109) col_counter = 6'd10;
+    else if (110 <= vga_x_pos && vga_x_pos <= 119) col_counter = 6'd11;
+    else if (120 <= vga_x_pos && vga_x_pos <= 129) col_counter = 6'd12;
+    else if (130 <= vga_x_pos && vga_x_pos <= 139) col_counter = 6'd13;
+    else if (140 <= vga_x_pos && vga_x_pos <= 149) col_counter = 6'd14;
+    else if (150 <= vga_x_pos && vga_x_pos <= 159) col_counter = 6'd15;
+    else if (160 <= vga_x_pos && vga_x_pos <= 169) col_counter = 6'd16;
+    else if (170 <= vga_x_pos && vga_x_pos <= 179) col_counter = 6'd17;
+    else if (180 <= vga_x_pos && vga_x_pos <= 189) col_counter = 6'd18;
+    else if (190 <= vga_x_pos && vga_x_pos <= 199) col_counter = 6'd19;
+    else if (200 <= vga_x_pos && vga_x_pos <= 209) col_counter = 6'd20;
+    else if (210 <= vga_x_pos && vga_x_pos <= 219) col_counter = 6'd21;
+    else if (220 <= vga_x_pos && vga_x_pos <= 229) col_counter = 6'd22;
+    else if (230 <= vga_x_pos && vga_x_pos <= 239) col_counter = 6'd23;
+    else if (240 <= vga_x_pos && vga_x_pos <= 249) col_counter = 6'd24;
+    else if (250 <= vga_x_pos && vga_x_pos <= 259) col_counter = 6'd25;
+    else if (260 <= vga_x_pos && vga_x_pos <= 269) col_counter = 6'd26;
+    else if (270 <= vga_x_pos && vga_x_pos <= 279) col_counter = 6'd27;
+    else if (280 <= vga_x_pos && vga_x_pos <= 289) col_counter = 6'd28;
+    else if (290 <= vga_x_pos && vga_x_pos <= 299) col_counter = 6'd29;
+    else if (300 <= vga_x_pos && vga_x_pos <= 309) col_counter = 6'd30;
+    else if (310 <= vga_x_pos && vga_x_pos <= 319) col_counter = 6'd31;
+    else if (320 <= vga_x_pos && vga_x_pos <= 329) col_counter = 6'd32;
+    else if (330 <= vga_x_pos && vga_x_pos <= 339) col_counter = 6'd33;
+    else if (340 <= vga_x_pos && vga_x_pos <= 349) col_counter = 6'd34;
+    else if (350 <= vga_x_pos && vga_x_pos <= 359) col_counter = 6'd35;
+    else if (360 <= vga_x_pos && vga_x_pos <= 369) col_counter = 6'd36;
+    else if (370 <= vga_x_pos && vga_x_pos <= 379) col_counter = 6'd37;
+    else if (380 <= vga_x_pos && vga_x_pos <= 389) col_counter = 6'd38;
+    else if (390 <= vga_x_pos && vga_x_pos <= 399) col_counter = 6'd39;
+    else if (400 <= vga_x_pos && vga_x_pos <= 409) col_counter = 6'd40;
+    else if (410 <= vga_x_pos && vga_x_pos <= 419) col_counter = 6'd41;
+    else if (420 <= vga_x_pos && vga_x_pos <= 429) col_counter = 6'd42;
+    else if (430 <= vga_x_pos && vga_x_pos <= 439) col_counter = 6'd43;
+    else if (440 <= vga_x_pos && vga_x_pos <= 449) col_counter = 6'd44;
+    else if (450 <= vga_x_pos && vga_x_pos <= 459) col_counter = 6'd45;
+    else if (460 <= vga_x_pos && vga_x_pos <= 469) col_counter = 6'd46;
+    else if (470 <= vga_x_pos && vga_x_pos <= 800) col_counter = 6'd47;
+
+    if      (  0 <= vga_y_pos && vga_y_pos <=   9) row_counter = 6'd0;
+    else if ( 10 <= vga_y_pos && vga_y_pos <=  19) row_counter = 6'd1;
+    else if ( 20 <= vga_y_pos && vga_y_pos <=  29) row_counter = 6'd2;
+    else if ( 30 <= vga_y_pos && vga_y_pos <=  39) row_counter = 6'd3;
+    else if ( 40 <= vga_y_pos && vga_y_pos <=  49) row_counter = 6'd4;
+    else if ( 50 <= vga_y_pos && vga_y_pos <=  59) row_counter = 6'd5;
+    else if ( 60 <= vga_y_pos && vga_y_pos <=  69) row_counter = 6'd6;
+    else if ( 70 <= vga_y_pos && vga_y_pos <=  79) row_counter = 6'd7;
+    else if ( 80 <= vga_y_pos && vga_y_pos <=  89) row_counter = 6'd8;
+    else if ( 90 <= vga_y_pos && vga_y_pos <=  99) row_counter = 6'd9;
+    else if (100 <= vga_y_pos && vga_y_pos <= 109) row_counter = 6'd10;
+    else if (110 <= vga_y_pos && vga_y_pos <= 119) row_counter = 6'd11;
+    else if (120 <= vga_y_pos && vga_y_pos <= 129) row_counter = 6'd12;
+    else if (130 <= vga_y_pos && vga_y_pos <= 139) row_counter = 6'd13;
+    else if (140 <= vga_y_pos && vga_y_pos <= 149) row_counter = 6'd14;
+    else if (150 <= vga_y_pos && vga_y_pos <= 159) row_counter = 6'd15;
+    else if (160 <= vga_y_pos && vga_y_pos <= 169) row_counter = 6'd16;
+    else if (170 <= vga_y_pos && vga_y_pos <= 179) row_counter = 6'd17;
+    else if (180 <= vga_y_pos && vga_y_pos <= 189) row_counter = 6'd18;
+    else if (190 <= vga_y_pos && vga_y_pos <= 199) row_counter = 6'd19;
+    else if (200 <= vga_y_pos && vga_y_pos <= 209) row_counter = 6'd20;
+    else if (210 <= vga_y_pos && vga_y_pos <= 219) row_counter = 6'd21;
+    else if (220 <= vga_y_pos && vga_y_pos <= 229) row_counter = 6'd22;
+    else if (230 <= vga_y_pos && vga_y_pos <= 239) row_counter = 6'd23;
+    else if (240 <= vga_y_pos && vga_y_pos <= 249) row_counter = 6'd24;
+    else if (250 <= vga_y_pos && vga_y_pos <= 259) row_counter = 6'd25;
+    else if (260 <= vga_y_pos && vga_y_pos <= 269) row_counter = 6'd26;
+    else if (270 <= vga_y_pos && vga_y_pos <= 279) row_counter = 6'd27;
+    else if (280 <= vga_y_pos && vga_y_pos <= 289) row_counter = 6'd28;
+    else if (290 <= vga_y_pos && vga_y_pos <= 299) row_counter = 6'd29;
+    else if (300 <= vga_y_pos && vga_y_pos <= 309) row_counter = 6'd30;
+    else if (310 <= vga_y_pos && vga_y_pos <= 319) row_counter = 6'd31;
+    else if (320 <= vga_y_pos && vga_y_pos <= 329) row_counter = 6'd32;
+    else if (330 <= vga_y_pos && vga_y_pos <= 339) row_counter = 6'd33;
+    else if (340 <= vga_y_pos && vga_y_pos <= 349) row_counter = 6'd34;
+    else if (350 <= vga_y_pos && vga_y_pos <= 359) row_counter = 6'd35;
+    else if (360 <= vga_y_pos && vga_y_pos <= 600) row_counter = 6'd36;
+  end
   /*// All output pins must be assigned. If not used, assign to 0.
   assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
   assign uio_out = 0;
