@@ -149,8 +149,6 @@ module spi
     assign spi_sio1_in = sio1_in_reg[32];
     assign spi_sio2_in = sio2_in_reg[32];
     assign spi_sio3_in = sio3_in_reg[32];*/
-    logic [4:0] shift_count;
-    logic [4:0] shift_max;
     logic sr_out_en, sio_read_en;
     enum logic [1:0] {
 	wt,
