@@ -417,8 +417,8 @@ module tt_um_sandsim_Alden_G878 (
      .vga_hsync, .vga_vsync);
 
   logic spi_read, spi_write, spi_init, spi_read_done, spi_write_done, spi_init_done;
-  logic [$clog2(COL/8)-1:0] spi_col;
-  logic [$clog2(ROW)-1:0]   spi_row;
+  logic [$clog2(`COL/8)-1:0] spi_col;
+  logic [$clog2(`ROW)-1:0]   spi_row;
   logic [7:0] spi_din, spi_dout;
   logic spi_sck, spi_csb;
   logic spi_sd0_out, spi_sd1_out, spi_sd2_out, spi_sd3_out;
