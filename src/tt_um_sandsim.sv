@@ -198,6 +198,7 @@ module spi
 	sio_highz_inp = 24'b0;
 	sr_out_en_inp = 1'b0;
 	shift_count_inp = 5'b0;
+        spi_read_inp = 1'b0;
 	if(nextState==write_load) begin
 	    sio0_out_inp = {8'b00111000, addr[20], addr[16], addr[12], addr[8], addr[4], addr[0], 10'b0};
             sio1_out_inp = {8'b0, addr[21], addr[17], addr[13], addr[9], addr[5], addr[1], 10'b0};
