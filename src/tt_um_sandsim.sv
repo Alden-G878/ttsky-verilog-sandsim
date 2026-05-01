@@ -188,7 +188,6 @@ module spi
     end
     assign spi_clk = (sr_out_en==1'b1) ? (clk) : (1'b0);
     assign spi_ceb = ~sr_out_en;
-    assign data_out = 
     always_comb begin
 	sio0_out_inp = sio0_out_reg;
 	sio1_out_inp = sio1_out_reg;
@@ -296,7 +295,7 @@ module spi
     
     always_comb begin
 	nextState = wt;
-	read_done = 1'b0
+	read_done = 1'b0;
 	write_done = 1'b0;
 	init_done = 1'b0;
 	case(currState)
