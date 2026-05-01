@@ -462,13 +462,6 @@ module tt_um_sandsim_Alden_G878 (
   assign uio_oe[2] = ~(spi_highz | spi_read_en);
   assign uio_oe[4] = ~(spi_highz | spi_read_en);
   assign uio_oe[5] = ~(spi_highz | spi_read_en);
-  // temporary assignments
-  assign spi_read = 1'b0;
-  assign spi_write = 1'b0;
-  assign spi_init = 1'b0;
-  assign spi_col = 3'b0;
-  assign spi_row = 6'b0;
-  assign spi_din = 8'b0;
   
   spi spi_cont
     (.clk, .rst_b,
@@ -507,7 +500,16 @@ module tt_um_sandsim_Alden_G878 (
   logic [5:0] col_counter, row_counter, prev_row_counter;
   logic [5:0] time_since_shift, prev_vga_y_pos;
   assign pix = line_disp_wb[col_counter];
+  logic [31:0] since_init;
   always_ff @(posedge clk) begin
+    since_init <= (since_init >= 32'd10000) ? (32'd10000) : (since_init <= since_init + 32'd1);
+    if(rst_b==1'b0) since_init <= 32'b0;
+    if(since_init == 1'b0) spi_init <= 1'b1);
+    else spi_init <= 1'b0;
+  end
+ 
+  always_ff @(posedge clk) begin
+    if(since_init >= 32'd1000) begin
     prev_row_counter <= row_counter;
     prev_vga_y_pos <= vga_y_pos;
     spi_write <= 1'b0;
@@ -591,6 +593,7 @@ module tt_um_sandsim_Alden_G878 (
       spi_din <= line_disp_wb[39:32];
       spi_col <= (col_counter >> 3'd3);
       spi_row <= row_counter;
+    end
     end
   end
   always_comb begin
